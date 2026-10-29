@@ -61,10 +61,18 @@ def send_smtp_email(payload: SubmissionSchema):
     """
     msg.attach(MIMEText(html_content, "html"))
 
-    # Connect to Gmail via SSL (Port 465)
-    with smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT, timeout=15) as server:
-        server.login(SMTP_USER, SMTP_PASSWORD)
-        server.sendmail(SMTP_USER, RECEIVER_EMAIL, msg.as_string())
+    port = int(SMTP_PORT)
+
+    # 465 requires direct SSL; 587 requires STARTTLS
+    if port == 465:
+        with smtplib.SMTP_SSL(SMTP_HOST, port, timeout=15) as server:
+            server.login(SMTP_USER, SMTP_PASSWORD)
+            server.sendmail(SMTP_USER, RECEIVER_EMAIL, msg.as_string())
+    else:
+        with smtplib.SMTP(SMTP_HOST, port, timeout=15) as server:
+            server.starttls()
+            server.login(SMTP_USER, SMTP_PASSWORD)
+            server.sendmail(SMTP_USER, RECEIVER_EMAIL, msg.as_string())
 
 @app.get("/")
 def read_root():
