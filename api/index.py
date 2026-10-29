@@ -67,13 +67,12 @@ def send_smtp_email(payload: SubmissionSchema):
         server.sendmail(SMTP_USER, RECEIVER_EMAIL, msg.as_string())
 
 @app.get("/")
-@app.get("/api")
-def home():
+def read_root():
     return {"status": "ok", "message": "Backend on Vercel is live."}
 
-@app.post("/api/submit")
 @app.post("/submit")
-def submit_form(data: SubmissionSchema):
+@app.post("/api/submit")
+def handle_submit(data: SubmissionSchema):
     try:
         send_smtp_email(data)
         return {"success": True, "message": "Submission recorded and email sent."}
